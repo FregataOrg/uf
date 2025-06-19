@@ -10,40 +10,67 @@ from langchain_community.chat_models import ChatOllama
 from langchain_core.messages import HumanMessage
 
 # --- グローバル設定 ---
-INPUT_DIR = "imgs"
+INPUT_DIR = "trim_imgs"
 OUTPUT_DIR = "outputs"
 CACHE_DIR = "analysis_cache"
-OLLAMA_MODEL = "llava"
+OLLAMA_MODEL = "z-uo/qwen2.5vl_tools:7b"
 
-# --- プロンプト定義 ---
+# --- プロンプト定義 (Qwen-VL向け改善版) ---
 
-# 1. ページ構造を解析させるためのプロンプト (パス1)
-ANALYSIS_PROMPT = """
-Analyze the layout and structure of this page from the 'Homotopy Type Theory' book.
-Identify key components such as headers, footers, main text columns, figures, captions, and complex mathematical formula blocks.
-Describe any potential challenges for OCR, such as multi-column layouts, rotated text, unusual fonts, or dense mathematical notation.
-Output your analysis as a concise list of observations in JSON format. Example: {"observations": ["Two-column layout", "Contains a complex diagram in the bottom-right", "Header contains page number"]}
+# 1. システムプロンプト（役割定義）
+# これを各呼び出しのプロンプトの先頭に追加するか、SystemMessageとして渡します。
+SYSTEM_PROMPT = """
+You are an expert digital archivist specializing in mathematical and scientific texts. Your task is to perform high-fidelity Optical Character Recognition (OCR) and document layout analysis, converting physical pages into perfectly structured Markdown documents with accurate LaTeX formatting.
 """
 
-# 2. 通常の抽出プロンプト (パス1)
-BASIC_EXTRACTION_PROMPT = """
-This image contains a page from the "Homotopy Type Theory: Univalent Foundations of Mathematics" book.
-Please transcribe the content into a clean Markdown format.
-Pay close attention to mathematical formulas and expressions, ensuring they are accurately represented, preferably using LaTeX syntax (e.g., $$ ... $$ or $ ... $).
-Do not add any comments or explanations, only the transcribed Markdown content.
+# 2. ページ構造を解析させるためのプロンプト (パス1)
+ANALYSIS_PROMPT = f"""{SYSTEM_PROMPT}
+Analyze the layout of this page by following these steps:
+1.  **Overall Layout**: First, identify the overall layout. Is it single-column, two-column, or something more complex?
+2.  **Component Identification**: Second, locate and identify all distinct components: headers, footers, main text body, figures, tables, and most importantly, mathematical formula blocks.
+3.  **Challenge Assessment**: Third, note any potential challenges for transcription, such as small font sizes, complex nested formulas, or unusual text flow.
+
+Provide your analysis as a concise JSON object, focusing only on the structural facts.
 """
 
-# 3. 解析結果を付加して高精度な抽出を行うプロンプトのテンプレート (パス2)
-REFINED_EXTRACTION_PROMPT_TEMPLATE = """
-This image contains a page from the "Homotopy Type Theory" book.
-A preliminary analysis of this page revealed the following structural points:
+# 3. 通常の抽出プロンプト (1パス処理用)
+# Few-Shotの例はここに含めるのが効果的です。
+# 【重要】 `PERFECT_EXAMPLE_MARKDOWN` は、ご自身で作成した高品質なサンプルに置き換えてください。
+PERFECT_EXAMPLE_MARKDOWN = """
+...as shown in the equation:
+
+$$ \sum_{i=0}^{n} i = \frac{n(n+1)}{2} $$
+
+This is followed by more text.
+"""
+
+BASIC_EXTRACTION_PROMPT = f"""{SYSTEM_PROMPT}
+Your task is to transcribe the provided page into a clean Markdown document with perfect LaTeX formatting.
+
+Here is an example of the quality and format required:
+--- EXAMPLE START ---
+{PERFECT_EXAMPLE_MARKDOWN}
+--- EXAMPLE END ---
+
+Now, transcribe the entire page. Your final output MUST be only the Markdown content, starting directly with the first character.
+"""
+
+# 4. 解析結果を付加して高精度な抽出を行うプロンプトのテンプレート (パス2)
+REFINED_EXTRACTION_PROMPT_TEMPLATE = f"""{SYSTEM_PROMPT}
+You will perform a highly accurate transcription of the provided page.
+
+First, study this example of the required output quality and format:
+--- EXAMPLE START ---
+{PERFECT_EXAMPLE_MARKDOWN}
+--- EXAMPLE END ---
+
+Next, study the preliminary analysis of this specific page's structure:
 --- ANALYSIS ---
-{analysis_text}
+{{analysis_text}}
 --- END ANALYSIS ---
-Considering this analysis, please perform a highly accurate transcription of the content into a clean Markdown format.
-Pay extra close attention to mathematical formulas, expressions, and the overall structure described in the analysis.
-Ensure formulas are correctly represented using LaTeX syntax ($$...$$ or $...$).
-Do not add any comments, just the final Markdown content.
+
+Considering both the example and the specific analysis, transcribe the entire page into a single, valid Markdown document.
+Pay extra close attention to details mentioned in the analysis. Do not include any other commentary.
 """
 
 
