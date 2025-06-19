@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "uf"
+version = "0.1.0"
+description = ""
+authors = ["Masaya-Sakamoto <masaya-sakamoto@kke.co.jp>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain = "^0.3.25"
+langchain-community = "^0.3.25"
+pillow = "^11.2.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
