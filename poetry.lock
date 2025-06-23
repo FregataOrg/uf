@@ -400,14 +400,6 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "numpy"
-version = "2.2.6"
-description = "Fundamental package for array computing in Python"
-category = "main"
-optional = false
-python-versions = ">=3.10"
-
-[[package]]
-name = "numpy"
 version = "2.3.0"
 description = "Fundamental package for array computing in Python"
 category = "main"
@@ -511,6 +503,25 @@ azure-key-vault = ["azure-identity (>=1.16.0)", "azure-keyvault-secrets (>=4.8.0
 gcp-secret-manager = ["google-cloud-secret-manager (>=2.23.1)"]
 toml = ["tomli (>=2.0.1)"]
 yaml = ["pyyaml (>=6.0.1)"]
+
+[[package]]
+name = "pypdf"
+version = "5.6.1"
+description = "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+typing_extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+crypto = ["cryptography"]
+cryptodome = ["pycryptodome"]
+dev = ["black", "flit", "pip-tools", "pre-commit", "pytest-cov", "pytest-socket", "pytest-timeout", "pytest-xdist", "wheel"]
+docs = ["myst-parser", "sphinx", "sphinx-rtd-theme"]
+full = ["cryptography", "Pillow (>=8.0.0)"]
+image = ["Pillow (>=8.0.0)"]
 
 [[package]]
 name = "python-dotenv"
@@ -692,7 +703,7 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "deb27dbe3a50d4015fa8c873a26060c9da8cd08e1cf06bd2162f352d7183a83f"
+content-hash = "88e6a5baea30ebdfd34d42bdcb093b8f3d60cb4160f9233148dcfd7236161d64"
 
 [metadata.files]
 aiohappyeyeballs = []
@@ -733,6 +744,7 @@ pycparser = []
 pydantic = []
 pydantic-core = []
 pydantic-settings = []
+pypdf = []
 python-dotenv = []
 pyyaml = []
 requests = []

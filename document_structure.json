@@ -1,5 +1,5 @@
 {
-  "last_processed_page": "page-016.jpg",
+  "last_processed_page": "page-018.jpg",
   "heading_context_stack": [
     {
       "level": 1,
@@ -8,6 +8,10 @@
     {
       "level": 2,
       "title": "Type Theory"
+    },
+    {
+      "level": 3,
+      "title": "Homotopy Type Theory"
     }
   ]
 }

@@ -9,6 +9,7 @@ python = "^3.10"
 langchain = "^0.3.25"
 langchain-community = "^0.3.25"
 pillow = "^11.2.1"
+pypdf = "^5.6.1"
 
 [tool.poetry.dev-dependencies]
 
