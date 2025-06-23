@@ -1,3 +1,4 @@
 imgs/*
-outputs/*
+outputs*/*
 trim_imgs/*
+analysis_cache/*

@@ -11,9 +11,9 @@ from langchain_core.messages import HumanMessage
 
 # --- グローバル設定 ---
 INPUT_DIR = "trim_imgs"
-OUTPUT_DIR = "outputs"
+OUTPUT_DIR = "outputs_v2"
 CACHE_DIR = "analysis_cache"
-OLLAMA_MODEL = "z-uo/qwen2.5vl_tools:7b"
+OLLAMA_MODEL = "qwen2.5vl:32b"
 
 # --- プロンプト定義 (Qwen-VL向け改善版) ---
 
@@ -169,7 +169,7 @@ def run_refine_process(chat_model, refine_files):
         if not b64_image: continue
 
         start_time = time.time()
-        final_prompt = REFINED_EXTRACTION_PROMPT_TEMPLATE.format(analysis_text=analysis_text)
+        final_prompt = REFINED_EXTRACTION_PROMPT_TEMPLATE.replace('{analysis_text}', analysis_text)
         markdown_content = call_llm(chat_model, final_prompt, b64_image)
         if markdown_content:
             with open(output_path, "w", encoding="utf-8") as f:

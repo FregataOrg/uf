@@ -15,7 +15,7 @@ INPUT_DIR = "trim_imgs"
 OUTPUT_DIR = "outputs"
 
 # 使用するOllamaモデル名 (事前に `ollama run llava` を実行)
-OLLAMA_MODEL = "z-uo/qwen2.5vl_tools:7b"
+OLLAMA_MODEL = "qwen2.5vl:7b-q4_K_M"
 
 # LLMへの指示（プロンプト）
 # HoTT Bookのページであることを伝え、数式に注意してMarkdownに変換するよう英語で指示
