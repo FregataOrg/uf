@@ -9,6 +9,7 @@ from langchain_core.output_parsers import StrOutputParser
 input_markdown_dir = 'outputs'
 translated_markdown_dir = 'outputs_traslated'
 translation_model = 'qwen3:32b'
+ollama_base_url='http://127.0.0.1:11434'
 
 def translate_markdown_file(filepath: Path, output_dir: Path, chain):
     """
@@ -59,7 +60,7 @@ def main():
     # 例: "llama3", "aya", "gemma2" など
     # temperature=0に設定することで、出力のランダム性を抑え、より安定した翻訳結果を得られます。
     try:
-        model = ChatOllama(model=translation_model, temperature=0.1)
+        model = ChatOllama(model=translation_model, temperature=0.1, base_url=ollama_base_url)
     except Exception as e:
         print(f"❌ エラー: Ollamaモデルの初期化に失敗しました - {e}")
         print("   Ollamaアプリケーションが正しく起動しているか確認してください。")
