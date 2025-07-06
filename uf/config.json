@@ -1,0 +1,26 @@
+// This is a example configuration file for the Universal Framework (UF).
+// You can modify the values according to your requirements.
+// Make sure to replace the placeholder values with your actual API keys and URLs.
+
+{
+    "active_provider": "openrouter",
+    "temperature": 0.1,
+    "directories": {
+      "input": "trim_imgs",
+      "output": "outputs_v2",
+      "cache": "analysis_cache"
+    },
+    "state_file_name": "document_structure.json",
+    "providers": {
+      "ollama": {
+        "model": "qwen2.5vl:32b",
+        "base_url": "http://localhost:11434"
+      },
+      "openrouter": {
+        "model": "google/gemini-pro-vision",
+        "api_key": "ここにあなたのOpenRouter APIキーを貼り付けます",
+        "base_url": "https://openrouter.ai/api/v1"
+      }
+    }
+  }
+  
