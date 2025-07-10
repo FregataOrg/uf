@@ -1,7 +1,7 @@
-from lib.Log import Logger
-from lib.FileManager import FileManager
-from lib.LLMClient import LLMClient
-from lib.DocumentProcessor import DocumentProcessor, DocumentState
+from lib.UnrollForge.Log import Logger
+from lib.UnrollForge.FileManager import FileManager
+from lib.UnrollForge.LLMClient import LLMClient
+from lib.UnrollForge.DocumentProcessor import DocumentProcessor, DocumentState
 from os import path
 import json
 import argparse

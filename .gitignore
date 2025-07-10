@@ -8,3 +8,7 @@ configs/*
 *.pyd
 __pycache__/
 *.so
+*.png
+*.jpg
+*.jpeg
+*.pdf
