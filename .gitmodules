@@ -1,0 +1,3 @@
+[submodule "uf/lib/PDF2Patches"]
+	path = uf/lib/PDF2Patches
+	url = https://github.com/fregata-ariel/pdf_patch.git
