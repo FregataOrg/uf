@@ -41,8 +41,15 @@ class DocumentState:
 # --- 5. DocumentProcessor クラス (オーケストレーター) ---
 class DocumentProcessor:
     """各コンポーネントを協調させ、ドキュメント処理のワークフロー全体を制御する。"""
-    SYSTEM_PROMPT = "You are an expert digital archivist..." # (プロンプトは簡略化)
-    PERFECT_EXAMPLE_MARKDOWN = "$$ \sum_{i=0}^{n} i = \frac{n(n+1)}{2} $$" # (プロンプトは簡略化)
+    SYSTEM_PROMPT = """
+You are an expert digital archivist specializing in mathematical and scientific texts. Your task is to perform high-fidelity Optical Character Recognition (OCR) and document layout analysis, converting physical pages into perfectly structured Markdown documents with accurate LaTeX formatting."""
+    PERFECT_EXAMPLE_MARKDOWN = """
+...as shown in the equation:
+
+$$ \sum_{i=0}^{n} i = \frac{n(n+1)}{2} $$
+
+This is followed by more text.
+"""
 
     def __init__(self, file_manager: FileManager, logger: Logger, llm_client: LLMClient, doc_state: DocumentState):
         self.file_manager = file_manager
@@ -62,7 +69,15 @@ class DocumentProcessor:
         b64_image = self.file_manager.read_image_as_base64(filename)
         if not b64_image: return None
 
-        analysis_prompt = f"{self.SYSTEM_PROMPT}\n{context_prompt}\nAnalyze the layout..." # (プロンプトは簡略化)
+        analysis_prompt = f"""
+        {self.SYSTEM_PROMPT}
+        {context_prompt}
+        Analyze the layout of this page by following these steps: 
+        1. **Overall Layout**: First, identify the overall layout. Is it single-column, two-colmun, or something more complex?
+        2. **Component Identification**: Second, locate and identify all distinct components: headers, footers, main text body, figures, tables, and most importantly, mathematical formula blocks.
+        3. **Challenge Assessment**: Third, note any potential challenges for transcription, such as small font sizes, comples nested formulas, or unusual text flow.
+        Provide your analysis as a concise JSON object, forcusing only on the structural facts.
+"""
         analysis_text = self.llm_client.invoke(analysis_prompt, b64_image)
 
         if analysis_text:
@@ -83,7 +98,16 @@ class DocumentProcessor:
         for filename in files_to_run:
             self.logger.start_section(f"ターゲット: {filename}")
             context_prompt, _ = self.doc_state.get_context_prompt()
-            basic_prompt = f"{self.SYSTEM_PROMPT}\n{context_prompt}\nYour task is to transcribe..." # (プロンプトは簡略化)
+            basic_prompt = f"""
+            {self.SYSTEM_PROMPT}
+            {context_prompt}
+            Your task is to transcribe the provided page into a clean Markdown document with perfect LaTeX formatting.
+            
+            Here is an example of the quality and format require:
+            --- EXAMPLE START ---
+            {self.perfect}
+            --- EXAMPLE END ---
+            """
 
             b64_image = self.file_manager.read_image_as_base64(filename)
             if not b64_image: continue
@@ -112,11 +136,19 @@ class DocumentProcessor:
             b64_image = self.file_manager.read_image_as_base64(filename)
             if not b64_image: continue
 
-            refined_prompt = f"""
-                {self.SYSTEM_PROMPT}\n{context_prompt}
-                ... EXAMPLE ...\n{self.PERFECT_EXAMPLE_MARKDOWN}\n--- ANALYSIS ---\n{analysis_text}\n--- END ANALYSIS ---
-                ... transcribe the entire page.
-            """ # (プロンプトは簡略化)
+            refined_template = f"""{SYSTEM_PROMPT}
+{context_prompt_str}
+You will perform a highly accurate transcription of the provided page.
+First, study this example:
+--- EXAMPLE START ---
+{PERFECT_EXAMPLE_MARKDOWN}
+--- END EXAMPLE ---
+Next, study this analysis:
+--- ANALYSIS ---
+{{analysis_text}}
+--- END ANALYSIS ---
+Considering both, transcribe the entire page.
+"""
 
             markdown_content = self.llm_client.invoke(refined_prompt, b64_image)
             if markdown_content:
