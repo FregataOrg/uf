@@ -5,6 +5,42 @@ from .Log import Logger
 from .LLMClient import LLMClient
 from os import path
 
+SYSTEM_PROMPT = """
+You are an expert digital archivist specializing in mathematical and scientific texts. Your task is to perform high-fidelity Optical Character Recognition (OCR) and document layout analysis, converting physical pages into perfectly structured Markdown documents with accurate LaTeX formatting.
+"""
+BASIC_PROMPT = """{}\n{}\n
+Your task is to transcribe the provided page into a clean Markdown document with perfect LaTeX formatting.\n
+Here is an example of the quality and format require:\n
+--- EXAMPLE START ---\n
+{}\n
+--- EXAMPLE END ---\n
+"""
+
+PERFECT_EXAMPLE_MARKDOWN = """
+### Example Inline Mathematical Formula
+
+This is an example of an inline mathematical formula: $E=mc^2$.
+
+### Exapmle Block Mathematical Formula
+
+This is an example of a block mathematical formula:
+```math
+\int_0^1 x^2 \, dx = \frac{1}{3}
+```
+
+### Example of a Table Content
+
+| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Row 1 Col 1 | Row 1 Col 2 | Row 1 Col 3 |
+| Row 2 Col 1 | Row 2 Col 2 | Row 2 Col 3 |
+
+### Example of a Figure Caption
+![Example Figure](placeholder.png)
+
+**This is a placeholder for an image caption. The actual image will be processed and inserted later.**
+"""
+
 # --- 4. DocumentState クラス ---
 class DocumentState:
     """ドキュメント全体の処理状態と構造的文脈（コンテキスト）を管理するクラス。"""
@@ -41,8 +77,7 @@ class DocumentState:
 # --- 5. DocumentProcessor クラス (オーケストレーター) ---
 class DocumentProcessor:
     """各コンポーネントを協調させ、ドキュメント処理のワークフロー全体を制御する。"""
-    SYSTEM_PROMPT = """
-You are an expert digital archivist specializing in mathematical and scientific texts. Your task is to perform high-fidelity Optical Character Recognition (OCR) and document layout analysis, converting physical pages into perfectly structured Markdown documents with accurate LaTeX formatting."""
+    
     PERFECT_EXAMPLE_MARKDOWN = """
 ...as shown in the equation:
 
@@ -70,7 +105,7 @@ This is followed by more text.
         if not b64_image: return None
 
         analysis_prompt = f"""
-        {self.SYSTEM_PROMPT}
+        {SYSTEM_PROMPT}
         {context_prompt}
         Analyze the layout of this page by following these steps: 
         1. **Overall Layout**: First, identify the overall layout. Is it single-column, two-colmun, or something more complex?
@@ -98,16 +133,7 @@ This is followed by more text.
         for filename in files_to_run:
             self.logger.start_section(f"ターゲット: {filename}")
             context_prompt, _ = self.doc_state.get_context_prompt()
-            basic_prompt = f"""
-            {self.SYSTEM_PROMPT}
-            {context_prompt}
-            Your task is to transcribe the provided page into a clean Markdown document with perfect LaTeX formatting.
-            
-            Here is an example of the quality and format require:
-            --- EXAMPLE START ---
-            {self.perfect}
-            --- EXAMPLE END ---
-            """
+            basic_prompt = BASIC_PROMPT.format(SYSTEM_PROMPT, context_prompt, self.PERFECT_EXAMPLE_MARKDOWN)
 
             b64_image = self.file_manager.read_image_as_base64(filename)
             if not b64_image: continue
@@ -136,8 +162,8 @@ This is followed by more text.
             b64_image = self.file_manager.read_image_as_base64(filename)
             if not b64_image: continue
 
-            refined_template = f"""{SYSTEM_PROMPT}
-{context_prompt_str}
+            refined_prompt = f"""{SYSTEM_PROMPT}
+{context_prompt}
 You will perform a highly accurate transcription of the provided page.
 First, study this example:
 --- EXAMPLE START ---
